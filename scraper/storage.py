@@ -3,8 +3,9 @@ from pathlib import Path
 
 
 def save_jsonl(records: list[dict], path: str) -> None:
-    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    output_path = Path(path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(path, "w", encoding="utf-8") as f:
+    with output_path.open("w", encoding="utf-8") as file:
         for record in records:
-            f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            file.write(json.dumps(record, ensure_ascii=False) + "\n")

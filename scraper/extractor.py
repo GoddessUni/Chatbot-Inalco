@@ -1,6 +1,9 @@
 from datetime import date
-from bs4 import BeautifulSoup
+
 import trafilatura
+from bs4 import BeautifulSoup
+
+from config import MIN_PAGE_CHARS
 
 
 def extract_page(url: str) -> dict | None:
@@ -13,25 +16,24 @@ def extract_page(url: str) -> dict | None:
         downloaded,
         include_links=True,
         include_tables=True,
-        favor_precision=True
+        include_comments=False,
+        favor_precision=True,
     )
 
-    if not text or len(text.strip()) < 100:
+    if not text or len(text.strip()) < MIN_PAGE_CHARS:
         return None
 
     soup = BeautifulSoup(downloaded, "html.parser")
-
-    title = soup.title.get_text(" ", strip=True) if soup.title else ""
-
+    html_title = soup.title.get_text(" ", strip=True) if soup.title else ""
     h1 = soup.find("h1")
-    main_title = h1.get_text(" ", strip=True) if h1 else title
+    title = h1.get_text(" ", strip=True) if h1 else html_title
 
     return {
         "source_url": url,
-        "title": main_title,
-        "html_title": title,
+        "title": title,
+        "html_title": html_title,
         "language": "fr",
         "content_type": "web_page",
         "last_seen": str(date.today()),
-        "text": text
+        "text": text,
     }

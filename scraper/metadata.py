@@ -1,24 +1,56 @@
-HIGH_RISK_KEYWORDS = [
-    "inscription", "réinscription", "admission",
-    "droits de scolarité", "tarifs", "bourse",
-    "logement", "examen", "rattrapage",
-    "calendrier", "handicap", "santé",
-    "psychologue", "harcèlement", "vss"
-]
+HIGH_RISK_KEYWORDS = (
+    "inscription",
+    "réinscription",
+    "admission",
+    "droits de scolarité",
+    "tarifs",
+    "bourse",
+    "logement",
+    "examen",
+    "rattrapage",
+    "calendrier",
+    "handicap",
+    "santé",
+    "psychologue",
+    "harcèlement",
+    "vss",
+)
 
-MEDIUM_RISK_KEYWORDS = [
-    "contact", "mail", "email", "adresse",
-    "horaire", "rendez-vous", "formulaire"
-]
+MEDIUM_RISK_KEYWORDS = (
+    "contact",
+    "mail",
+    "email",
+    "adresse",
+    "horaire",
+    "rendez-vous",
+    "formulaire",
+    "secrétariat",
+)
+
+THEMES = (
+    ("Harcèlement et VSS", ("harcèlement", "vss", "violence sexiste", "violences sexuelles")),
+    ("Handicap", ("handicap", "paeh", "mdph", "aménagement")),
+    ("Examens", ("examen", "rattrapage", "partiel", "épreuve")),
+    ("Emplois du temps", ("emploi du temps", "planning")),
+    ("Inscriptions", ("inscription", "réinscription", "admission", "candidature")),
+    ("Bibliothèque", ("bibliothèque", "ressources numériques", "bulac")),
+    ("Bourses et aides", ("bourse", "aide financière", "crous", "dossier social étudiant")),
+    ("Logement", ("logement", "résidence universitaire")),
+    ("Santé et bien-être", ("santé", "psychologue", "bien-être", "service de santé étudiant")),
+    ("Numérique et outils", ("moodle", "messagerie", "compte numérique", "wifi", "eduroam")),
+    ("Orientation et insertion", ("orientation", "insertion", "stage", "alternance")),
+    ("International", ("international", "erasmus", "mobilité")),
+    ("Associations et vie de campus", ("association", "vie de campus", "engagement étudiant")),
+)
 
 
 def detect_risk_level(text: str) -> str:
     lower = text.lower()
 
-    if any(k in lower for k in HIGH_RISK_KEYWORDS):
+    if any(keyword in lower for keyword in HIGH_RISK_KEYWORDS):
         return "high"
 
-    if any(k in lower for k in MEDIUM_RISK_KEYWORDS):
+    if any(keyword in lower for keyword in MEDIUM_RISK_KEYWORDS):
         return "medium"
 
     return "low"
@@ -27,26 +59,16 @@ def detect_risk_level(text: str) -> str:
 def detect_theme(text: str) -> str:
     lower = text.lower()
 
-    if "moodle" in lower or "numérique" in lower or "messagerie" in lower:
-        return "Numérique et outils"
-
-    if "inscription" in lower or "scolarité" in lower or "examen" in lower:
-        return "Scolarité"
-
-    if "bourse" in lower or "logement" in lower:
-        return "Aides et accompagnements"
-
-    if "santé" in lower or "psychologue" in lower or "bien-être" in lower:
-        return "Santé et bien-être"
-
-    if "stage" in lower or "insertion professionnelle" in lower:
-        return "Insertion professionnelle"
+    for theme, keywords in THEMES:
+        if any(keyword in lower for keyword in keywords):
+            return theme
 
     return "Général"
 
 
 def enrich_chunk(chunk: dict) -> dict:
-    chunk["risk_level"] = detect_risk_level(chunk["text"])
-    chunk["theme"] = detect_theme(chunk["text"])
-    chunk["source_verified"] = True
+    chunk = dict(chunk)
+    searchable_text = f"{chunk.get('title', '')}\n{chunk['text']}"
+    chunk["risk_level"] = detect_risk_level(searchable_text)
+    chunk["theme"] = detect_theme(searchable_text)
     return chunk
