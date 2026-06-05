@@ -1,0 +1,59 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# PyCharm
+.idea/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# NLP / LLM
+models/
+checkpoints/
+outputs/
+
+# HuggingFace cache
+.cache/
+hf_cache/
+
+# Vector databases
+chroma_db/
+faiss_index/
+
+# Temporary files
+tmp/
+temp/
+
+# Generated datasets
+*.sqlite
+*.db
