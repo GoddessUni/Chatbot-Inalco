@@ -23,7 +23,7 @@ def _preference_score(record: dict) -> tuple:
     )
 
 
-def deduplicate_records(records: list[dict]) -> tuple[list[dict], list[dict]]:
+def mark_duplicate_pages(records: list[dict]) -> tuple[list[dict], list[dict]]:
     groups = {}
     duplicates = []
 
@@ -33,20 +33,68 @@ def deduplicate_records(records: list[dict]) -> tuple[list[dict], list[dict]]:
         record["content_hash"] = digest
         groups.setdefault(digest, []).append(record)
 
-    unique = []
+    marked = []
     for digest, group in groups.items():
         preferred = max(group, key=_preference_score)
-        unique.append(preferred)
+        standard_url = preferred.get("source_url")
+
+        for record in group:
+            record["is_duplicate"] = record is not preferred
+            record["duplicate_of"] = standard_url if record is not preferred else None
+            record["standard_source_url"] = standard_url
+            marked.append(record)
+
+            if record is not preferred:
+                duplicates.append(
+                    {
+                        "source_url": record.get("source_url"),
+                        "duplicate_of": standard_url,
+                        "content_hash": digest,
+                    }
+                )
+
+    return marked, duplicates
+
+
+def merge_duplicate_chunks(records: list[dict]) -> tuple[list[dict], list[dict]]:
+    groups = {}
+    duplicates = []
+
+    for record in records:
+        record = dict(record)
+        digest = content_hash(record["text"])
+        record["content_hash"] = digest
+        groups.setdefault(digest, []).append(record)
+
+    merged = []
+    for digest, group in groups.items():
+        preferred = max(group, key=_preference_score)
+        standard_url = preferred.get("source_url")
+        source_urls = sorted(
+            {
+                record.get("source_url")
+                for record in group
+                if record.get("source_url")
+            }
+        )
+
+        preferred["standard_source_url"] = standard_url
+        preferred["source_url"] = standard_url
+        preferred["source_urls"] = source_urls
+        preferred["has_duplicate_sources"] = len(source_urls) > 1
+        merged.append(preferred)
 
         for record in group:
             if record is preferred:
                 continue
             duplicates.append(
                 {
+                    "chunk_id": record.get("chunk_id"),
                     "source_url": record.get("source_url"),
-                    "duplicate_of": preferred.get("source_url"),
+                    "duplicate_of_chunk_id": preferred.get("chunk_id"),
+                    "standard_source_url": standard_url,
                     "content_hash": digest,
                 }
             )
 
-    return unique, duplicates
+    return merged, duplicates

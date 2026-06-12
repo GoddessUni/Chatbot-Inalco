@@ -6,6 +6,33 @@ from bs4 import BeautifulSoup
 from config import MIN_PAGE_CHARS
 
 
+def _parse_markdown_sections(markdown: str, fallback_title: str) -> list[dict]:
+    sections = []
+    current_title = fallback_title
+    current_lines = []
+
+    def flush() -> None:
+        text = "\n".join(current_lines).strip()
+        if text:
+            sections.append({"section_title": current_title, "text": text})
+
+    for line in markdown.splitlines():
+        stripped = line.strip()
+
+        if stripped.startswith("#"):
+            heading = stripped.lstrip("#").strip()
+            if heading:
+                flush()
+                current_lines = []
+                current_title = heading
+                continue
+
+        current_lines.append(line)
+
+    flush()
+    return sections
+
+
 def extract_page(url: str) -> dict | None:
     downloaded = trafilatura.fetch_url(url)
 
@@ -28,6 +55,16 @@ def extract_page(url: str) -> dict | None:
     h1 = soup.find("h1")
     title = h1.get_text(" ", strip=True) if h1 else html_title
 
+    markdown = trafilatura.extract(
+        downloaded,
+        output_format="markdown",
+        include_links=True,
+        include_tables=True,
+        include_comments=False,
+        favor_precision=True,
+    )
+    sections = _parse_markdown_sections(markdown or text, title)
+
     return {
         "source_url": url,
         "title": title,
@@ -36,4 +73,5 @@ def extract_page(url: str) -> dict | None:
         "content_type": "web_page",
         "last_seen": str(date.today()),
         "text": text,
+        "sections": sections,
     }

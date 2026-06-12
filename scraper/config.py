@@ -21,11 +21,14 @@ EXCLUDED_EXTENSIONS = (
     ".ico",
 )
 
+# Ces pages ne contiennent pas de connaissances utiles pour répondre aux questions des étudiants.
 EXCLUDED_PATHS = (
     "/fr/footer/inalco-fr.html",
     "/fr/footer/autres-liens/politique-de-confidentialite.html",
+    "/fr/etudes/accompagnement-vers-la-reussite/direction-d-etudes.html",
 )
 
+# Marque ces pages comme peu prioritaires ou provisoire.
 TEMPORAL_PATH_PREFIXES = (
     "/fr/actualites/",
     "/fr/evenements/",
@@ -43,5 +46,19 @@ MIN_PAGE_CHARS = 100
 
 CHUNK_MAX_CHARS = 1500
 CHUNK_MIN_CHARS = 200
+MIN_INDEXABLE_CHARS = 40
+SHORT_CHUNK_CHARS = 200
+SHORT_CHUNK_PRIORITY_FACTOR = 0.7
+
+INVALID_CONTENT_PATTERNS = (
+    "comment déposer un pdf",
+    "ne remonte pas dans les recherches",
+)
+
+PLACEHOLDER_CONTENT = (
+    "carence",
+    "en attente",
+    "en cours de construction",
+)
 
 USER_AGENT = "InalcoStudentChatbotResearch/0.2 (+academic project)"
