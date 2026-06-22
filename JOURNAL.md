@@ -115,3 +115,51 @@ Review priorities: Counter({'P2': 158, 'P1': 85, 'P0': 60})
 On constate que "Général" représente près d’un tiers du thèmes, et le poids de la recherche pour les 58 segments courts a été réduit.
 
 Une vérification humaine peut être effectuée après confirmation du fonctionnement du système. Lors de la phase de test la semaine prochaine, je vais les considérer comme valides et constituer un jeu de données à partir de questions et réponses réelles afin de tester si ces segments marche bien pour le RAG.
+
+## Semaine 3 (15/06/2026-21/06/2026)
+Comme je l'ai mentionné dans ma présentation, les informations qui intéressent les étudiants ne sont pas uniquement disponibles sur Portail ; des sites web comme Inalco.fr et Moodle contiennent aussi des contenus importants. Si on donne les étiquettes aux sources d'information dans la base de connaissances, RAG peut récupérer des données depuis plusieurs sites web. 
+
+Afin d'éviter toute confusion, j'ai ajouté des métadonnées à chaque segment. Cela permet à RAG de rechercher simultanément sur plusieurs sites lors de la récupération des données, et de savoir d'où proviennent les informations quand il répond aux questions.
+
+Je vais concevoir le processus comme cela : premièrement, le système recherche tous les segments officiels, puis fusionner les résultats (tels que le portail et inalco.fr), les trie par l’importance de la source, supprime le contenu dupliqué et similaire, et enfin sélectionne les sources les plus pertinentes (top-k) pour générer des réponses.
+
+Par exemple, lorsqu'un étudiant consulte les frais de scolarité, le RAG doit rechercher la page « droits de scolarité » sur inalco.fr et « inscription » sur portal-etudiant. Si les deux résultats sont les même, ils peuvent être fusionnés. Sinon l'utilisateur doit être invité à consulter la page officielle la plus récente.
+
+La priorité des stratégies de requête peut varier selon le type de question. Par exemple, les questions sur la vie étudiante pourraient présenter principalement sur portail, tandis que les questions sur la formation et l'administration pourraient principalement sur inalco.fr. Cependant, lors de la conception du code, j'ai constaté que cela mène à une logique de requête complexe et réduirait la fiabilité.
+
+J'ai modifié le crawler pour qu'il parcoure plusieurs URL simultanément et j'ai ajouté des étiquettes de domaine pour les traiter séparément.
+
+Mais j'ai découvert que  le processus de scraper l'intégralité du site inalco.fr mène à un résultat chaotique, j'ai donc décidé de le compléter avec quelques sujets basés sur les questions clés des étudiants : frais de scolarité, inscription administrative, maître d'admission, candidatures, contacts scolarité, bibliothèque / ressources numériques, handicap, harcèlement / VSS, calendrier universitaire.
+
+J'ai aussi ajouté source_utils.py pour une gestion unifiée des sources. Et j’ai légèrement augmenté le poids d'inalco.fr pour des informations administratives.
+
+Cette fois-ci, le pipeline retourne le résultat suivant : 
+
+Pages: 252 
+Chunks: 706 
+Unique page URLs: 252 
+Unique chunk IDs: 706 
+Duplicate pages marked: 53 
+Chunks with multiple sources: 211 
+
+Source domains: Counter({'portail-etudiant.inalco.fr': 162, 'www.inalco.fr': 90}) 
+Source scopes: Counter({'official_student_portal': 162, 'official_institutional_site': 90}) 
+
+Knowledge types: Counter({'stable': 199, 'temporal': 47, 'portal_help': 6}) 
+Themes: Counter({'Général': 245, 'Inscriptions': 92, 'International': 91, 'Associations et vie de campus': 73, 'Santé et bien-être': 51, 'Orientation et insertion': 49, 'Bourses et aides': 28, 'Handicap': 23, 'Numérique et outils': 18, 'Examens': 14, 'Emplois du temps': 8, 'Harcèlement et VSS': 7, 'Scolarité': 6, 'Bibliothèque': 1})
+Risk levels: Counter({'low': 365, 'high': 239, 'medium': 102}) 
+
+Missing page titles: 5 
+Missing chunk titles: 14 
+Missing section titles: 2 
+Short chunks (<200 chars): 81 
+Long chunks (>1800 chars): 0 
+JavaScript noise: 0 
+Unverified high-risk chunks: 239 
+Quality statuses: Counter({'review': 528, 'ready': 178}) 
+Quality flags: Counter({'generic_theme': 245, 'multiple_sources': 211, 'contains_date': 180, 'temporal_content': 129, 'short_chunk': 81, 'contains_email': 61, 'contains_amount': 17, 'missing_title': 14, 'contains_phone': 10, 'missing_section_title': 2, 'construction_notice': 1}) 
+Review priorities: Counter({'P2': 346, 'P1': 150, 'P0': 89}) 
+
+Après avoir vérifier les segments, j’ai constaté que cette version récupère correctement les informations d'inalco.fr, mais qu'elle contenait également de nombreuses données peu important avec le service aux étudiants, ce qui risque de nuire à la précision des réponses générées par RAG.
+
+Par conséquent, j'ajouterai des restrictions supplémentaires afin que les informations collectées correspondent davantage aux questions essentielles des étudiants.
