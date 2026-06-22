@@ -17,6 +17,7 @@ def _preference_score(record: dict) -> tuple:
     path_depth = len([part for part in path.split("/") if part])
     return (
         record.get("retrieval_priority", 1.0),
+        1 if record.get("source_scope") == "official_institutional_site" else 0,
         path_depth,
         bool(record.get("title")),
         len(record.get("text", "")),
@@ -77,10 +78,26 @@ def merge_duplicate_chunks(records: list[dict]) -> tuple[list[dict], list[dict]]
                 if record.get("source_url")
             }
         )
+        source_domains = sorted(
+            {
+                record.get("source_domain")
+                for record in group
+                if record.get("source_domain")
+            }
+        )
+        source_scopes = sorted(
+            {
+                record.get("source_scope")
+                for record in group
+                if record.get("source_scope")
+            }
+        )
 
         preferred["standard_source_url"] = standard_url
         preferred["source_url"] = standard_url
         preferred["source_urls"] = source_urls
+        preferred["source_domains"] = source_domains
+        preferred["source_scopes"] = source_scopes
         preferred["has_duplicate_sources"] = len(source_urls) > 1
         merged.append(preferred)
 

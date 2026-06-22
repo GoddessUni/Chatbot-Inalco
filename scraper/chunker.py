@@ -109,6 +109,8 @@ def build_chunks(page: dict) -> list[dict]:
                     "source_url": page["source_url"],
                     "title": page["title"],
                     "section_title": section_title,
+                    "source_domain": page.get("source_domain"),
+                    "source_scope": page.get("source_scope"),
                     "language": page["language"],
                     "content_type": page["content_type"],
                     "last_seen": page["last_seen"],

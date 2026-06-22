@@ -1,3 +1,6 @@
+{"url": "http://www.inalco.fr/formations/formation-distance/mooc", "stage": "crawl", "error": "404 Client Error: Not Found for url: https://www.inalco.fr/formations/formation-distance/mooc"}
+{"url": "https://www.inalco.fr/formations/(secretariat.sdl@inalco.fr", "stage": "crawl", "error": "404 Client Error: Not Found for url: https://www.inalco.fr/formations/(secretariat.sdl@inalco.fr"}
+{"url": "http://www.inalco.fr/formations/(secretariat.sdl@inalco.fr", "stage": "crawl", "error": "404 Client Error: Not Found for url: https://www.inalco.fr/formations/(secretariat.sdl@inalco.fr"}
 {"url": "https://portail-etudiant.inalco.fr/fr/aide-et-accompagnements.html", "stage": "extract", "error": "No usable text extracted"}
 {"url": "https://portail-etudiant.inalco.fr/fr/aide-et-accompagnements/entraide-etudiante.html", "stage": "extract", "error": "No usable text extracted"}
 {"url": "https://portail-etudiant.inalco.fr/fr/aide-et-accompagnements/etudiant-a-statut-particulier.html", "stage": "extract", "error": "No usable text extracted"}

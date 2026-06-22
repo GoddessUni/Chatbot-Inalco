@@ -25,6 +25,10 @@ def audit(pages_path: str, chunks_path: str, review_path: str | None = None) -> 
     )
     print()
 
+    print("Source domains:", Counter(page.get("source_domain", "missing") for page in pages))
+    print("Source scopes:", Counter(page.get("source_scope", "missing") for page in pages))
+    print()
+
     print(
         "Knowledge types:",
         Counter(page.get("knowledge_type", "missing") for page in pages),

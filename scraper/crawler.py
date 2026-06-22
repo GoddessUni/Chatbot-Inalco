@@ -6,14 +6,12 @@ import requests
 from bs4 import BeautifulSoup
 
 from config import (
-    ALLOWED_DOMAIN,
-    ALLOWED_PATH_PREFIX,
     CRAWL_DELAY,
     EXCLUDED_EXTENSIONS,
-    EXCLUDED_PATHS,
     MAX_PAGES,
     REQUEST_TIMEOUT,
     SEED_URLS,
+    SOURCE_PROFILES,
     USER_AGENT,
 )
 
@@ -32,20 +30,22 @@ def normalize_url(url: str) -> str:
 def is_allowed_url(url: str) -> bool:
     parsed = urlparse(url)
     path = parsed.path.lower()
+    profile = SOURCE_PROFILES.get(parsed.netloc)
 
     if parsed.scheme not in {"http", "https"}:
         return False
 
-    if parsed.netloc != ALLOWED_DOMAIN:
+    if not profile:
         return False
 
-    if not parsed.path.startswith(ALLOWED_PATH_PREFIX):
+    allowed_prefixes = profile.get("allowed_path_prefixes", ())
+    if allowed_prefixes and not any(parsed.path.startswith(prefix) for prefix in allowed_prefixes):
         return False
 
     if path.endswith(EXCLUDED_EXTENSIONS):
         return False
 
-    if any(excluded in parsed.path for excluded in EXCLUDED_PATHS):
+    if any(excluded in parsed.path for excluded in profile.get("excluded_paths", ())):
         return False
 
     return True
