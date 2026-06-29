@@ -38,17 +38,22 @@ def is_allowed_url(url: str) -> bool:
     if not profile:
         return False
 
-    allowed_prefixes = profile.get("allowed_path_prefixes", ())
-    if allowed_prefixes and not any(parsed.path.startswith(prefix) for prefix in allowed_prefixes):
-        return False
-
     if path.endswith(EXCLUDED_EXTENSIONS):
         return False
 
     if any(excluded in parsed.path for excluded in profile.get("excluded_paths", ())):
         return False
 
-    return True
+    exact_paths = profile.get("allowed_exact_paths", ())
+    allowed_prefixes = profile.get("allowed_path_prefixes", ())
+
+    if exact_paths and parsed.path in exact_paths:
+        return True
+
+    if allowed_prefixes and any(parsed.path.startswith(prefix) for prefix in allowed_prefixes):
+        return True
+
+    return False
 
 
 def crawl_site() -> tuple[list[str], list[dict]]:
@@ -81,6 +86,11 @@ def crawl_site() -> tuple[list[str], list[dict]]:
             continue
 
         urls.append(url)
+        profile = SOURCE_PROFILES.get(urlparse(url).netloc, {})
+        if not profile.get("crawl_links", True):
+            time.sleep(CRAWL_DELAY)
+            continue
+
         soup = BeautifulSoup(response.text, "html.parser")
 
         for link in soup.find_all("a", href=True):

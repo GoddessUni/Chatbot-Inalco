@@ -6,13 +6,14 @@ from cleaner import clean_page
 from crawler import crawl_site
 from deduplicate import mark_duplicate_pages, merge_duplicate_chunks
 from extractor import extract_page
+from kb_builder import build_kb, print_summary
 from metadata import enrich_chunk
 from page_filter import classify_page
 from quality import assess_chunk, assess_page, build_review_record
 from storage import save_jsonl
 
 
-def build_knowledge_base(output_dir: str) -> None:
+def build_knowledge_base(output_dir: str, build_partitions: bool = True) -> None:
     output = Path(output_dir)
     urls, crawl_failures = crawl_site()
 
@@ -99,9 +100,18 @@ def build_knowledge_base(output_dir: str) -> None:
     print(f"Rejected chunks: {len(rejected_chunks)}")
     print(f"Review queue: {len(review_queue)}")
 
+    if build_partitions:
+        summary = build_kb(output / "chunks.jsonl", output / "kb")
+        print_summary(summary)
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--output-dir", default="data")
+    parser.add_argument(
+        "--skip-kb",
+        action="store_true",
+        help="Do not generate partitioned RAG knowledge-base files.",
+    )
     args = parser.parse_args()
-    build_knowledge_base(args.output_dir)
+    build_knowledge_base(args.output_dir, build_partitions=not args.skip_kb)

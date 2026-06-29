@@ -15,6 +15,8 @@ SOURCE_PROFILES = {
     "portail-etudiant.inalco.fr": {
         "source_scope": "official_student_portal",
         "source_priority": 1.0,
+        "crawl_links": True,
+        "allowed_exact_paths": (),
         "allowed_path_prefixes": ("/fr/",),
         "excluded_paths": (
             "/fr/footer/inalco-fr.html",
@@ -33,35 +35,31 @@ SOURCE_PROFILES = {
     "www.inalco.fr": {
         "source_scope": "official_institutional_site",
         "source_priority": 1.15,
-        # Keep this deliberately narrow at first. Add more official pages
-        # only when they answer an evaluation question.
-        "allowed_path_prefixes": (
+        # Keep institutional pages as an explicit whitelist. Add more exact
+        # pages only when they answer an evaluation question.
+        "crawl_links": False,
+        "allowed_exact_paths": (
             "/foire-aux-questions-faq-procedure-dinscription",
             "/faq-admission-en-master",
             "/droits-de-scolarite-tarifs-exoneration-annulation-remboursement",
-            "/formations/",
-            "/actualites/",
         ),
+        "allowed_path_prefixes": (),
         "excluded_paths": (),
-        "temporal_path_prefixes": (
-            "/actualites/",
-        ),
+        "temporal_path_prefixes": (),
         "low_priority_path_prefixes": (),
     },
     "inalco.fr": {
         "source_scope": "official_institutional_site",
         "source_priority": 1.15,
-        "allowed_path_prefixes": (
+        "crawl_links": False,
+        "allowed_exact_paths": (
             "/foire-aux-questions-faq-procedure-dinscription",
             "/faq-admission-en-master",
             "/droits-de-scolarite-tarifs-exoneration-annulation-remboursement",
-            "/formations/",
-            "/actualites/",
         ),
+        "allowed_path_prefixes": (),
         "excluded_paths": (),
-        "temporal_path_prefixes": (
-            "/actualites/",
-        ),
+        "temporal_path_prefixes": (),
         "low_priority_path_prefixes": (),
     },
 }
