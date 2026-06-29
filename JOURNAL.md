@@ -163,3 +163,45 @@ Review priorities: Counter({'P2': 346, 'P1': 150, 'P0': 89})
 Après avoir vérifier les segments, j’ai constaté que cette version récupère correctement les informations d'inalco.fr, mais qu'elle contenait également de nombreuses données peu important avec le service aux étudiants, ce qui risque de nuire à la précision des réponses générées par RAG.
 
 Par conséquent, j'ajouterai des restrictions supplémentaires afin que les informations collectées correspondent davantage aux questions essentielles des étudiants.
+
+## Semaine 4 (22/06/2026-28/06/2026)
+Comme mon script récupérait du contenu non pertinent et sans importance, j'ai décidé d'utiliser un mécanisme de liste blanche pour limiter la portée de la collecte : pour inalco.fr, je ne récupérerais que les URL de départ, sans explorer les liens suivants. Par conséquent, j'ai ajouté une fonction pour vérifier les paths exacts.
+
+Le site inalco.fr/formations/... compte un grand nombre de pages, dont une grande partie présente des descriptions de programmes spécialisés peu adaptés à un chatbot de services aux étudiants généraliste ; j'ai donc choisi de ne conserver que les pages de programmes pertinentes au regard des objectifs du chatbot.
+
+Le résultat indique que le contenu utilisé pour la base de connaissances principale est strictement limité : 
+
+Knowledge types: Counter({'stable': 139, 'temporal': 24, 'portal_help': 6}) 
+Themes: Counter({'Général': 129, 'Inscriptions': 73, 'Associations et vie de campus': 67, 'International': 47, 'Santé et bien-être': 35, 'Orientation et insertion': 32, 'Bourses et aides': 27, 'Handicap': 23, 'Numérique et outils': 16, 'Examens': 15, 'Harcèlement et VSS': 7, 'Scolarité': 6, 'Emplois du temps': 4}) 
+Risk levels: Counter({'high': 199, 'low': 199, 'medium': 83}) 
+
+Missing page titles: 5 
+Missing chunk titles: 15 
+Missing section titles: 3 
+Short chunks (<200 chars): 67 
+Long chunks (>1800 chars): 0 
+JavaScript noise: 0 
+Unverified high-risk chunks: 199 
+Quality statuses: Counter({'review': 295, 'ready': 186}) 
+Quality flags: Counter({'generic_theme': 129, 'contains_date': 106, 'short_chunk': 67, 'contains_email': 60, 'multiple_sources': 45, 'temporal_content': 44, 'missing_title': 15, 'contains_amount': 14, 'contains_phone': 7, 'missing_section_title': 3, 'construction_notice': 1}) 
+Review priorities: Counter({'P2': 161, 'P1': 120, 'P0': 79}) 
+
+Le script applique des étiquettes de partition, mais ne génère pas encore concrètement plusieurs fichiers de partition ou plusieurs index. Afin d'améliorer la précision des recherches RAG, je tente d'organiser les segments récupérés en plusieurs modules distincts lors de la constitution de la base de connaissances.
+
+Après avoir essayé diverses stratégies de partition, j'ai réparti les segments acquis en quatre catégories : stable, temporal, portal_help et review. Ensuite, j'ai préparé le texte d'embedding pour chaque segment, et j’ai ajouté des éléments tels que les titres, les sujets et les sources afin d'assurer une meilleure correspondance avec les questions des étudiants lors de la phase de recherche.
+
+Et j’ai obtenu les segments avec les partitions différentes:
+
+total_chunks: 481 
+main_ready: 186 
+stable_ready: 185 
+portal_help_ready: 1 
+temporal_separate: 44 
+review_all: 295 
+review_p0: 79 
+review_p1: 120 
+review_p2_candidate: 161 
+
+J'ai conçu la fonction build_embedding_text pour générer le texte adapté à l’embedding pour chaque segments.
+
+Mon objectif actuel est d'abord d'établir un baseline RAG standard , et je peux donc commencer par utiliser BM25 pour valider les segments récupérés, puis générer des embeddings pour ceux-ci.
