@@ -205,3 +205,63 @@ review_p2_candidate: 161
 J'ai conçu la fonction build_embedding_text pour générer le texte adapté à l’embedding pour chaque segments.
 
 Mon objectif actuel est d'abord d'établir un baseline RAG standard , et je peux donc commencer par utiliser BM25 pour valider les segments récupérés, puis générer des embeddings pour ceux-ci.
+
+## Semaine 5 (29/06/2026-05/07/2026)
+Cette semaine, j'ai commencé à concevoir la partie d’embedding. Dans le prototype de chatbot, j'ai ajouté tous les segments au prototype de base de connaissances.
+
+J'ai d'abord essayé d'utiliser un embedding de hashing local pour valider le pipeline. Comme il ne s'agit pas d'un véritable embedding sémantique, il n'a pas pu trouver avec précision le segment correspondant à la question « Quels sont les jours et horaires d’ouverture de l’Inalco ? ». Si la question et les mots de la page Web ne sont pas les mêmes, la priorité de recherche sera plus faible. De plus, le thème de Général est trop vaste et mélangé à de nombreuses pages, ce qui entraîne un ordre instable dans les résultats de recherche.
+
+Cette version prouvant que le pipeline est utilisable, j'ai décidé de  le modifier avec un modèle d’embedding sémantique pour améliorer le problème et d'utiliser un routeur pour faciliter la recherche. Le routeur n’est pas utilisé comme un classifieur bloquant, la recherche s’effectue toujours sur l’ensemble de la base documentaire, et certains thèmes reçoivent un léger bonus lorsque la question contient des indices lexicaux pertinents. Cela permet de conserver la capacité de généralisation de la recherche sémantique et d’améliorer la robustesse sur les questions fréquentes. 
+
+J'ai essayé d'utiliser le modèle multilingue e5-base pour tester localement les performances d’embedding et de recherche. Lors de l'utilisation du nouveau système pour interroger les options de transport pour les deux campus, j'ai rencontré un problème : certaines pages n'étaient pas indexées ou étaient exclues. Après vérification des scripts de scraping, j'ai modifié le fichier config.py pour ajouter des URL spécifiques à la liste blanche. J'ai ensuite modifié le fichier build_e5_index.py pour conserver les métadonnées, ce qui facilite la distinction ultérieure du contenu des pages Web. Et j’ai ajouté les routeurs pour la formation, la scolarité, et le campus.
+
+J'ai constaté que la version actuelle a un problème avec le tri des 5 premiers segments trouvés pour la question “Comment se rendre sur les différents sites de l'Inalco ?". Les mots « se rendre / site / accès » du question provoque le rappel de pages telles que « accéder à Evento / services numériques ». J'ai modifié les scripts retrieve.py et retrieve_e5.py pour augmenter l'importance des mots-clés pertinents, et maintenant le système peut trouver le bon segment.
+
+Maintenant pour cette question, le système retrouve les 5 meilleurs segments suivants: 
+
+[1] score=2.1012
+semantic_score: 0.8412
+title: La Maison de la recherche
+section: Accès
+theme: Général
+quality: review / P2
+source: https://www.inalco.fr/la-maison-de-la-recherche
+text: **En métro :** - M1 - station Palais-Royal - Musée du Louvre - M4 - station Saint-Germain-des-Prés - M7 - station Palais-Royal - Musée du Louvre - M12 - station rue du Bac **En bus : **lignes 27, 39, 68, 69, 87, 95 - arrêt Pont du Carrousel - Quai Voltaire **En RER** : RER C - station Musée d’Orsay
+
+[2] score=1.9068
+semantic_score: 0.8268
+title: Le Pôle des langues et civilisations
+section: En bus :
+theme: Bibliothèque
+quality: review / P2
+source: https://www.inalco.fr/le-pole-des-langues-et-civilisations
+text: Ligne 83 : arrêt Olympiades Ligne 89 : arrêt bibliothèque François Mitterrand Lignes 27, 62, 64, 132, N31 : arrêt Patay-Tolbiac
+
+[3] score=1.8956
+semantic_score: 0.8156
+title: Le Pôle des langues et civilisations
+section: En métro :
+theme: Bibliothèque
+quality: review / P2
+source: https://www.inalco.fr/le-pole-des-langues-et-civilisations
+text: Ligne 14, station bibliothèque François Mitterrand
+
+[4] score=1.892
+semantic_score: 0.812
+title: Le Pôle des langues et civilisations
+section: En RER :
+theme: Bibliothèque
+quality: review / P2
+source: https://www.inalco.fr/le-pole-des-langues-et-civilisations
+text: RER C, station bibliothèque François Mitterrand
+
+[5] score=1.6498
+semantic_score: 0.8498
+title: Se rendre à l'Inalco
+section: La Maison de la recherche
+theme: Général
+quality: review / P2
+source: https://portail-etudiant.inalco.fr/fr/vie-de-campus/accueil-et-integration/se-rendre-a-l-inalco.html
+text: Le site historique de la Maison de la recherche héberge les unités de recherche, la direction de la recherche et des études doctorales, les publications de l'Inalco mais aussi l'ingénierie administrative et financière de la recherche. *Maison de la recherche (Paris 7e) © Inalco* - **Adresse** Inalco - 2 rue de Lille, 75007 Paris Téléphone (accueil) : +33 (0)1 81 70 10 22 **Horaires d'ouverture :** de 8h30 à 20h00 du lundi au vendredi
+
+Le système peut désormais identifier avec précision les segments correspondant aux certaines questions clés. La prochaine étape consiste à l'adapter aux questions courantes et à concevoir la partie de génération des réponses.
