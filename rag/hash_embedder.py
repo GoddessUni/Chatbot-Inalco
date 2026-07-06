@@ -25,7 +25,6 @@ def embed_text(text: str, dim: int = 768) -> list[float]:
 
     for token, count in counts.items():
         index, sign = _bucket(token, dim)
-        # Le traitement de la fréquence des mots réduit l'influence des mots récurrents dans les menus ou la navigation.
         vector[index] += sign * (1.0 + math.log(count))
 
     norm = math.sqrt(sum(value * value for value in vector))

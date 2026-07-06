@@ -21,6 +21,7 @@ def compact(value: object) -> str:
 
 
 def build_embedding_text(chunk: dict) -> str:
+    """Build the text sent to embedding models, without changing source text."""
     fields = [
         ("Titre", chunk.get("title")),
         ("Section", chunk.get("section_title")),
