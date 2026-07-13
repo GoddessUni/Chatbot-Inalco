@@ -265,3 +265,20 @@ source: https://portail-etudiant.inalco.fr/fr/vie-de-campus/accueil-et-integrati
 text: Le site historique de la Maison de la recherche héberge les unités de recherche, la direction de la recherche et des études doctorales, les publications de l'Inalco mais aussi l'ingénierie administrative et financière de la recherche. *Maison de la recherche (Paris 7e) © Inalco* - **Adresse** Inalco - 2 rue de Lille, 75007 Paris Téléphone (accueil) : +33 (0)1 81 70 10 22 **Horaires d'ouverture :** de 8h30 à 20h00 du lundi au vendredi
 
 Le système peut désormais identifier avec précision les segments correspondant aux certaines questions clés. La prochaine étape consiste à l'adapter aux questions courantes et à concevoir la partie de génération des réponses.
+
+## Semaine 6 (06/07/2026-12/07/2026)
+Cette semaine, j’ai avancé sur la partie génération de réponses du prototype de chatbot RAG.
+
+Après la construction de l’index vectoriel avec le modèle d’embedding multilingue, j’ai ajouté une étape de génération fondée sur les passages retrouvés dans la base documentaire. L’objectif est que le chatbot ne réponde pas directement à partir des connaissances générales du modèle, mais uniquement à partir des extraits récupérés par le système RAG.
+
+J’ai donc conçu un script de construction de prompt. Celui-ci assemble la question de l’étudiant, les passages les plus pertinents retrouvés dans l’index, leurs métadonnées, ainsi que les URLs sources. Le prompt contient des consignes explicites, et il demande au modèle de ne pas inventer d’informations absentes du contexte, notamment les dates, horaires, montants, adresses, contacts ou procédures administratives. Il demande aussi de citer les sources utilisées et de signaler lorsque l’information n’est pas présente dans la documentation collectée.
+
+J’ai donc conçu un script prompt.py avec la méthode standard, qui permet au modèle de synthétiser plusieurs extraits lorsque ceux-ci se complètent.
+
+Pour la génération, j’ai commencé à tester une intégration locale avec Ollama. Le prototype appelle un modèle de génération local via l’API d’Ollama après l’étape de récupération des passages. Cela permet de conserver une architecture locale pour les premiers essais : la question est traitée par le pipeline RAG, les extraits sont intégrés au prompt, puis le modèle génère une réponse accompagnée des sources.
+
+J’ai d’abord utilisé le modèle Mistral disponible dans Ollama pour valider la chaîne complète : question d’utilisateur → récupération des segments → construction du prompt → génération locale → réponse avec sources.
+
+Les premiers tests montrent que le système retrouve correctement les pages pertinentes lorsque les informations sont présentes dans la base. Par exemple, pour les questions sur l’accès aux différents sites de l’Inalco, les extraits concernant le Pôle des langues et civilisations et la Maison de la recherche sont bien récupérés. J’ai aussi identifié certains cas où la base documentaire était incomplète. par exemple, la page « Se nourrir » contenait des informations plus détaillées sur les cafétérias et restaurants Crous, mais ces éléments n’étaient pas présents dans l’ancien index. J’ai donc modifié le script d’extraction afin de mieux conserver les contenus structurés, notamment les blocs de cartes ou de listes, qui peuvent contenir des adresses et horaires.
+
+Maintenant ce prototype de chatbot est capable de fournir des réponses en fonction des questions saisies par les utilisateurs. Ma prochaine étape vise à la préparation d’une première grille d’évaluation portant sur la pertinence des sources, la fidélité de la réponse et les cas d’abstention. Et je comparerai les réponses générées avec le prompt standard et le prompt plus strict.
