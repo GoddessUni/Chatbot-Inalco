@@ -273,7 +273,7 @@ Après la construction de l’index vectoriel avec le modèle d’embedding mult
 
 J’ai donc conçu un script de construction de prompt. Celui-ci assemble la question de l’étudiant, les passages les plus pertinents retrouvés dans l’index, leurs métadonnées, ainsi que les URLs sources. Le prompt contient des consignes explicites, et il demande au modèle de ne pas inventer d’informations absentes du contexte, notamment les dates, horaires, montants, adresses, contacts ou procédures administratives. Il demande aussi de citer les sources utilisées et de signaler lorsque l’information n’est pas présente dans la documentation collectée.
 
-J’ai donc conçu un script prompt.py avec la méthode standard, qui permet au modèle de synthétiser plusieurs extraits lorsque ceux-ci se complètent.
+C'est un prompt avec la méthode standard, qui permet au modèle de synthétiser plusieurs extraits lorsque ceux-ci se complètent.
 
 Pour la génération, j’ai commencé à tester une intégration locale avec Ollama. Le prototype appelle un modèle de génération local via l’API d’Ollama après l’étape de récupération des passages. Cela permet de conserver une architecture locale pour les premiers essais : la question est traitée par le pipeline RAG, les extraits sont intégrés au prompt, puis le modèle génère une réponse accompagnée des sources.
 
