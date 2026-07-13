@@ -1,0 +1,39 @@
+{
+  "total_chunks": 1003,
+  "partitions": {
+    "review_p2_candidate": 312,
+    "review_p1": 41,
+    "temporal_separate": 72,
+    "review_p0": 148,
+    "main_ready": 358,
+    "review_other": 72
+  },
+  "knowledge_types": {
+    "stable": 893,
+    "temporal": 72,
+    "portal_help": 38
+  },
+  "quality_statuses": {
+    "review": 645,
+    "ready": 358
+  },
+  "review_priorities": {
+    "P2": 363,
+    "P1": 235,
+    "P0": 161,
+    "none": 244
+  },
+  "recommended_first_rag_files": [
+    "kb/main_ready.jsonl",
+    "kb/stable_ready.jsonl",
+    "kb/portal_help_ready.jsonl"
+  ],
+  "use_with_caution": [
+    "kb/temporal_separate.jsonl",
+    "kb/review_p2_candidate.jsonl"
+  ],
+  "do_not_index_before_human_review": [
+    "kb/review_p0.jsonl",
+    "kb/review_p1.jsonl"
+  ]
+}
