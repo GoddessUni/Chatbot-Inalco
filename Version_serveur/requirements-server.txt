@@ -1,0 +1,5 @@
+vllm>=0.9.1
+sentence-transformers
+requests
+beautifulsoup4
+trafilatura
