@@ -3,3 +3,4 @@ sentence-transformers
 requests
 beautifulsoup4
 trafilatura
+pypdf>=5.0

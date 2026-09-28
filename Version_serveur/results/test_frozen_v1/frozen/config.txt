@@ -1,0 +1,15 @@
+run=evaluation/test_frozen_v1_20260921_0439
+index_source=/data/ddcheng/projects/chatbot-Inalco_v0.3/indexes/e5_pdf_meta_20260915_1549/index.jsonl
+dataset=evaluation/test_frozen_v1_20260921_0439/frozen/questions_100_final.jsonl
+llm=mistralai/Ministral-8B-Instruct-2410
+embedding_model=intfloat/multilingual-e5-base
+top_k=5
+m2_route_boost_weight=0.10
+m3_m4_route_boost_weight=0
+semantic_threshold=0.869201
+max_context_chars=6000
+max_chunk_chars=1000
+temperature=0.1
+top_p=0.8
+num_predict=500
+seed=42

@@ -1,0 +1,44 @@
+{
+  "input": "evaluation/experiment_20260921_0250/m4_validation_v2.jsonl",
+  "records": 20,
+  "scored_records": 20,
+  "accuracy": 0.65,
+  "macro_f1": 0.4230769230769231,
+  "per_label": {
+    "answer": {
+      "precision": 0.9090909090909091,
+      "recall": 0.6666666666666666,
+      "f1": 0.7692307692307692,
+      "support": 15
+    },
+    "clarify": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 2
+    },
+    "abstain": {
+      "precision": 0.3333333333333333,
+      "recall": 1.0,
+      "f1": 0.5,
+      "support": 3
+    }
+  },
+  "confusion": {
+    "answer": {
+      "answer": 10,
+      "clarify": 0,
+      "abstain": 5
+    },
+    "clarify": {
+      "answer": 1,
+      "clarify": 0,
+      "abstain": 1
+    },
+    "abstain": {
+      "answer": 0,
+      "clarify": 0,
+      "abstain": 3
+    }
+  }
+}

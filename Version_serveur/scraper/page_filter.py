@@ -13,7 +13,21 @@ def classify_page(page: dict) -> dict:
 
     profile = SOURCE_PROFILES.get(parsed.netloc, {})
 
-    if any(path.startswith(prefix) for prefix in profile.get("temporal_path_prefixes", ())):
+    is_temporal_exact = path in profile.get("temporal_exact_paths", ())
+    is_temporal_prefix = any(
+        path.startswith(prefix)
+        for prefix in profile.get("temporal_path_prefixes", ())
+    )
+
+    explicit_knowledge_type = page.get("knowledge_type")
+    if explicit_knowledge_type in {"stable", "temporal", "portal_help"}:
+        knowledge_type = explicit_knowledge_type
+        retrieval_priority = {
+            "stable": 1.0,
+            "temporal": 0.5,
+            "portal_help": 0.7,
+        }[knowledge_type]
+    elif is_temporal_exact or is_temporal_prefix:
         knowledge_type = "temporal"
         retrieval_priority = 0.5
     elif any(path.startswith(prefix) for prefix in profile.get("low_priority_path_prefixes", ())):
@@ -31,7 +45,7 @@ def classify_page(page: dict) -> dict:
             "source_scope": profile_scope,
             "knowledge_type": knowledge_type,
             "retrieval_priority": retrieval_priority,
-            "source_type": "official_web_page",
+            "source_type": page.get("source_type", "official_web_page"),
             "scraped_successfully": True,
             "human_verified": False,
         }

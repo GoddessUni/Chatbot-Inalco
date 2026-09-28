@@ -1,0 +1,13 @@
+{
+  "method": "m2_rerank",
+  "splits": [
+    "validation"
+  ],
+  "questions": 20,
+  "answer_questions": 15,
+  "hit_rate_at_k": 0.7333333333333333,
+  "mrr": 0.6388888888888888,
+  "context_hit_rate": 0.7333333333333333,
+  "mean_gold_recall_at_k": 0.6555555555555554,
+  "mean_context_gold_recall": 0.6222222222222221
+}

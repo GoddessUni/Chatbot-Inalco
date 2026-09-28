@@ -3,7 +3,12 @@ import json
 from pathlib import Path
 
 from e5_embedder import DEFAULT_E5_MODEL, cosine, encode_query
-from retrieve import detect_routes, rerank_bonus, route_boost
+from retrieve import (
+    detect_routes,
+    rerank_bonus,
+    route_boost,
+    select_intent_candidates,
+)
 
 
 def load_jsonl(path: str | Path) -> list[dict]:
@@ -24,11 +29,12 @@ def retrieve(
     routes = detect_routes(question)
 
     hits = []
-    for record in index:
+    for record in select_intent_candidates(index, question):
         semantic_score = cosine(query_vector, record["vector"])
         score = semantic_score
-        score += route_boost_weight * route_boost(record, routes)
-        score += rerank_bonus(record, question, routes)
+        heuristic_score = route_boost(record, routes)
+        heuristic_score += rerank_bonus(record, question, routes)
+        score += route_boost_weight * heuristic_score
         if score >= min_score:
             hit = dict(record)
             hit["semantic_score"] = round(semantic_score, 4)

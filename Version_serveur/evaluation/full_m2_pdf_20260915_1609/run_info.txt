@@ -1,0 +1,3 @@
+run=full_m2_pdf_20260915_1609
+index=/data/ddcheng/projects/chatbot-Inalco_v0.3/indexes/e5_pdf_meta_20260915_1549/index.jsonl
+model=mistralai/Ministral-8B-Instruct-2410

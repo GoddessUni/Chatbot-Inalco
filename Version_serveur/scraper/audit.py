@@ -27,6 +27,22 @@ def audit(pages_path: str, chunks_path: str, review_path: str | None = None) -> 
 
     print("Source domains:", Counter(page.get("source_domain", "missing") for page in pages))
     print("Source scopes:", Counter(page.get("source_scope", "missing") for page in pages))
+    print("Content types:", Counter(page.get("content_type", "missing") for page in pages))
+    print(
+        "PDF documents:",
+        sum(page.get("content_type") == "pdf" for page in pages),
+    )
+    print(
+        "PDF chunks:",
+        sum(chunk.get("content_type") == "pdf" for chunk in chunks),
+    )
+    print(
+        "PDF chunks missing page numbers:",
+        sum(
+            chunk.get("content_type") == "pdf" and chunk.get("page_start") is None
+            for chunk in chunks
+        ),
+    )
     print()
 
     print(
@@ -34,6 +50,22 @@ def audit(pages_path: str, chunks_path: str, review_path: str | None = None) -> 
         Counter(page.get("knowledge_type", "missing") for page in pages),
     )
     print("Themes:", Counter(chunk.get("theme", "missing") for chunk in chunks))
+    print(
+        "Audiences:",
+        Counter(
+            audience
+            for chunk in chunks
+            for audience in (chunk.get("audience") or ["missing"])
+        ),
+    )
+    print(
+        "Journey stages:",
+        Counter(chunk.get("journey_stage", "missing") for chunk in chunks),
+    )
+    print(
+        "Chunks with academic year:",
+        sum(bool(chunk.get("academic_years")) for chunk in chunks),
+    )
     print("Risk levels:", Counter(chunk.get("risk_level", "missing") for chunk in chunks))
     print()
 

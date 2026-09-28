@@ -3,12 +3,14 @@ from pathlib import Path
 
 from chunker import build_chunks
 from cleaner import clean_page
+from config import PDF_SOURCES
 from crawler import crawl_site
 from deduplicate import mark_duplicate_pages, merge_duplicate_chunks
 from extractor import extract_page
 from kb_builder import build_kb, print_summary
 from metadata import enrich_chunk
 from page_filter import classify_page
+from pdf_extractor import download_and_extract_pdf
 from quality import assess_chunk, assess_page, build_review_record
 from storage import save_jsonl
 
@@ -21,31 +23,51 @@ def build_knowledge_base(output_dir: str, build_partitions: bool = True) -> None
     extraction_failures = []
     rejected_pages = []
 
-    for index, url in enumerate(urls, start=1):
-        print(f"[{index}/{len(urls)}] Extracting {url}")
-        page = extract_page(url)
-
+    def process_page(page: dict | None, source_url: str) -> None:
         if not page:
             extraction_failures.append(
-                {"url": url, "stage": "extract", "error": "No usable text extracted"}
+                {
+                    "url": source_url,
+                    "stage": "extract",
+                    "error": "No usable text extracted",
+                }
             )
-            continue
+            return
 
-        page = clean_page(page)
-        page = classify_page(page)
-
-        accepted, reasons = assess_page(page)
+        cleaned_page = clean_page(page)
+        classified_page = classify_page(cleaned_page)
+        accepted, reasons = assess_page(classified_page)
         if not accepted:
             rejected_pages.append(
                 {
-                    "source_url": page["source_url"],
-                    "title": page.get("title"),
+                    "source_url": classified_page["source_url"],
+                    "title": classified_page.get("title"),
                     "rejection_reasons": reasons,
                 }
             )
-            continue
+            return
 
-        pages.append(page)
+        pages.append(classified_page)
+
+    for index, url in enumerate(urls, start=1):
+        print(f"[{index}/{len(urls)}] Extracting {url}")
+        process_page(extract_page(url), url)
+
+    for index, source in enumerate(PDF_SOURCES, start=1):
+        source_url = source["source_url"]
+        print(f"[PDF {index}/{len(PDF_SOURCES)}] Extracting {source_url}")
+        try:
+            page = download_and_extract_pdf(source)
+        except Exception as exc:
+            extraction_failures.append(
+                {
+                    "url": source_url,
+                    "stage": "extract_pdf",
+                    "error": f"{type(exc).__name__}: {exc}",
+                }
+            )
+            continue
+        process_page(page, source_url)
 
     pages, page_duplicates = mark_duplicate_pages(pages)
 
@@ -68,6 +90,10 @@ def build_knowledge_base(output_dir: str, build_partitions: bool = True) -> None
                     "source_url": chunk.get("source_url"),
                     "title": chunk.get("title"),
                     "section_title": chunk.get("section_title"),
+                    "content_type": chunk.get("content_type"),
+                    "document_title": chunk.get("document_title"),
+                    "page_start": chunk.get("page_start"),
+                    "page_end": chunk.get("page_end"),
                     "text": chunk.get("text"),
                     "rejection_reasons": rejection_reasons,
                 }
@@ -89,7 +115,7 @@ def build_knowledge_base(output_dir: str, build_partitions: bool = True) -> None
     save_jsonl(review_queue, str(output / "review_queue.jsonl"))
 
     print()
-    print(f"Discovered URLs: {len(urls)}")
+    print(f"Discovered URLs: {len(urls) + len(PDF_SOURCES)}")
     print(f"Extracted pages: {len(pages)}")
     print(f"Unique chunks before quality filtering: {len(chunks)}")
     print(f"Indexable chunks: {len(indexable_chunks)}")

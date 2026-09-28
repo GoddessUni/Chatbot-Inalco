@@ -26,7 +26,14 @@ def build_embedding_text(chunk: dict) -> str:
         ("Titre", chunk.get("title")),
         ("Section", chunk.get("section_title")),
         ("Theme", chunk.get("theme")),
+        ("Public concerne", chunk.get("audience")),
+        ("Etape du parcours", chunk.get("journey_stage")),
+        ("Annees universitaires", chunk.get("academic_years")),
         ("Type d'information", chunk.get("knowledge_type")),
+        ("Type de contenu", chunk.get("content_type")),
+        ("Document", chunk.get("document_title")),
+        ("Pages", _page_label(chunk)),
+        ("Période de validité", chunk.get("validity_period")),
         ("Niveau de risque", chunk.get("risk_level")),
         ("Domaine source", chunk.get("source_domain")),
         ("Portee source", chunk.get("source_scope")),
@@ -46,6 +53,16 @@ def build_embedding_text(chunk: dict) -> str:
     lines.append("Contenu:")
     lines.append(compact(chunk.get("text")))
     return "\n".join(line for line in lines if line)
+
+
+def _page_label(chunk: dict) -> str:
+    start = chunk.get("page_start")
+    end = chunk.get("page_end")
+    if start is None:
+        return ""
+    if end is None or end == start:
+        return str(start)
+    return f"{start}-{end}"
 
 
 def prepare_kb_chunk(chunk: dict) -> dict:
@@ -95,6 +112,14 @@ def write_manifest(chunks: list[dict], output_dir: Path) -> None:
         "total_chunks": len(chunks),
         "partitions": Counter(chunk.get("kb_partition") for chunk in chunks),
         "knowledge_types": Counter(chunk.get("knowledge_type") for chunk in chunks),
+        "audiences": Counter(
+            audience
+            for chunk in chunks
+            for audience in (chunk.get("audience") or ["missing"])
+        ),
+        "journey_stages": Counter(
+            chunk.get("journey_stage", "missing") for chunk in chunks
+        ),
         "quality_statuses": Counter(chunk.get("quality_status") for chunk in chunks),
         "review_priorities": Counter(
             chunk.get("review_priority") or "none" for chunk in chunks

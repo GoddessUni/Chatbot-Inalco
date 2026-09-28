@@ -1,0 +1,44 @@
+{
+  "input": "evaluation/final_validation_20260921_0404/m1_rag_simple.jsonl",
+  "records": 20,
+  "scored_records": 20,
+  "accuracy": 0.75,
+  "macro_f1": 0.2857142857142857,
+  "per_label": {
+    "answer": {
+      "precision": 0.75,
+      "recall": 1.0,
+      "f1": 0.8571428571428571,
+      "support": 15
+    },
+    "clarify": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 2
+    },
+    "abstain": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 3
+    }
+  },
+  "confusion": {
+    "answer": {
+      "answer": 15,
+      "clarify": 0,
+      "abstain": 0
+    },
+    "clarify": {
+      "answer": 2,
+      "clarify": 0,
+      "abstain": 0
+    },
+    "abstain": {
+      "answer": 3,
+      "clarify": 0,
+      "abstain": 0
+    }
+  }
+}

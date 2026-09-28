@@ -1,0 +1,11 @@
+Mon Sep 21 04:29:20 CEST 2026
+Python 3.11.2
+INDEX=/data/ddcheng/projects/chatbot-Inalco_v0.3/indexes/e5_20260921_0348/index.jsonl
+THRESHOLD=0.869201
+MODEL=mistralai/Ministral-8B-Instruct-2410
+31166df14052052a7fedcecffd9e6e3393dbdde9a14c54a86a5a3d4c465ab1e1  indexes/e5_20260921_0348/index.jsonl
+336dd65e25cb00d8f20b8e620e8557c8f36b2f05f3c40b22d117e6b6bdc3cd48  evaluation/questions_100_final.jsonl
+97f72c90aeb5b8ceada3303dde0bfd2d5a55b0ec501d074e9a87971054cfcda5  rag/prompts.py
+0bcf1b68ecfe5020373f5dadf64b612617fed96578f6459824fdf9c03fd735a3  rag/retrieve.py
+acc8f7d6cea654d69fafbf4acd473010062bb3af29ce31cb5a52e49a2d2b689a  rag/retrieve_e5.py
+55dec3c63ed1c33cd85e734613ee3409c8b0ba068aed5312fae8506a5d480d13  rag/answer_vllm.py

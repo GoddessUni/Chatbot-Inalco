@@ -34,6 +34,7 @@ def clean_page(page: dict) -> dict:
     page["text"] = clean_text(page["text"])
     page["sections"] = [
         {
+            **section,
             "section_title": clean_text(section.get("section_title", "")),
             "text": clean_text(section.get("text", "")),
         }

@@ -313,3 +313,59 @@ Les tests ont toutefois révélé plusieurs erreurs de classement. Le terme « C
 Après cette correction, les résultats relatifs aux restaurants proviennent principalement de la page « Se nourrir » et les pages de bourses ne figurent plus parmi les premiers résultats. Il reste néanmoins des doublons proches, par exemple deux versions du passage consacré à Plan Libre, qui occupent inutilement plusieurs positions. De plus, une question demandant une liste complète peut nécessiter plusieurs sections d’une même page, alors qu’un top-k fixe ne garantit pas leur présence dans le contexte final.
 
 La prochaine étape sera donc d’ajouter une suppression des quasi-doublons au moment de la récupération, un réordonnancement des candidats et une expansion contrôlée vers les sections voisines d’une même page pour les questions de type liste. Je pourrai ensuite relancer le jeu de tests et comparer le RAG simple, le RAG avec réordonnancement, le seuil de confiance et l’abstention.
+
+## Semaine 10 (31/08/2026-06/09/2026)
+
+Cette semaine, j’ai réexaminé le périmètre fonctionnel du chatbot. Les premières versions étaient principalement conçues pour les étudiants déjà inscrits, alors que le chatbot doit également pouvoir répondre aux personnes qui souhaitent découvrir les formations ou candidater à l’Inalco.
+
+J’ai donc élargi la liste blanche utilisée pour le site institutionnel. En plus des informations concernant la vie étudiante, la scolarité et les services numériques, le pipeline peut maintenant collecter des pages relatives aux formations, aux candidatures, aux conditions d’admission et aux inscriptions administratives. Cette extension reste contrôlée afin d’éviter de réintroduire un trop grand nombre de pages institutionnelles sans rapport direct avec les besoins des utilisateurs.
+
+Afin de distinguer les situations des utilisateurs sans leur imposer une classification préalable, j’ai ajouté des métadonnées d’audience et d’étape du parcours. Les segments peuvent notamment concerner les candidats, les étudiants admis mais pas encore inscrits, les étudiants inscrits ou l’ensemble des publics. Les étapes comprennent le choix d’une formation, la candidature, l’inscription administrative, l’inscription pédagogique et le déroulement des études.
+
+Cette représentation permet au système de rechercher dans une base commune tout en conservant le contexte administratif de chaque information. Elle doit notamment réduire les confusions entre candidature, admission, inscription administrative et inscription pédagogique.
+
+J’ai également revu les règles de génération. Lorsque la question dépend d’une formation, d’un niveau ou du profil du candidat, le chatbot ne doit pas sélectionner arbitrairement une procédure. Pour certaines questions insuffisamment précisées, par exemple les dates de candidature ou le niveau de français requis, le système doit demander une clarification.
+
+La prochaine étape consiste à construire un jeu d’évaluation qui couvre à la fois les candidats et les étudiants inscrits, puis à comparer plusieurs mécanismes de récupération et de contrôle des réponses.
+
+## Semaine 11 (07/09/2026-13/09/2026)
+
+J’ai conçu cette semaine un protocole expérimental pour comparer plusieurs variantes du chatbot dans les mêmes conditions.
+
+J’ai préparé un jeu de 100 questions représentatives. Les questions couvrent les formations, les candidatures, les inscriptions, les bourses, le logement, la restauration, les emplois du temps, les examens, les services numériques, la mobilité internationale, la santé, le handicap et la vie associative.
+
+Chaque question est associée à un comportement attendu : répondre, demander une clarification ou s’abstenir. Pour les questions auxquelles le système doit répondre, j’ai ajouté des faits de référence et les passages officiels qui permettent de les vérifier. Le jeu a été divisé en trois parties : 10 questions pilotes, 20 questions de validation et 70 questions de test.
+
+J’ai défini cinq configurations expérimentales :
+
+- M0 : modèle de langage sans récupération documentaire ;
+- M1 : RAG avec recherche sémantique simple ;
+- M2 : RAG avec réordonnancement heuristique ;
+- M3 : RAG avec seuil de confiance et mécanisme de clarification ;
+- M4 : RAG avec seuil, clarification et consigne stricte d’abstention.
+
+Ces configurations utilisent le même modèle de génération, le même modèle d’embedding et le même index. Cette organisation permet d’attribuer les différences observées au mécanisme étudié plutôt qu’à un changement de modèle ou de corpus.
+
+J’ai également développé des scripts pour mesurer la récupération documentaire à partir des preuves annotées. Les principales mesures sont Hit@k, MRR, rappel des preuves à Top-k, présence d’une preuve correcte dans le contexte final et rappel des preuves présentes dans ce contexte.
+
+Pour le comportement du chatbot, j’évalue séparément les décisions de réponse, de clarification et d’abstention. Cette distinction est importante, car une accuracy élevée peut être trompeuse si une méthode répond systématiquement à toutes les questions.
+
+Les essais pilotes ont montré qu’un bonus lexical trop important peut améliorer certains thèmes, mais aussi provoquer des erreurs de routage. Par exemple, le terme « sites » dans une question sur le Wi-Fi pouvait faire remonter des pages décrivant l’accès aux bâtiments. Le réordonnancement est donc conservé comme une configuration expérimentale, et non comme une amélioration supposée acquise.
+
+## Semaine 12 (14/09/2026-20/09/2026)
+
+Cette semaine, j’ai synchronisé les nouvelles versions des scripts avec le serveur du laboratoire et reconstruit la base documentaire et l’index d’embeddings.
+
+Le pipeline prend désormais en compte les pages destinées aux candidats et aux étudiants inscrits. Il conserve les métadonnées d’audience, d’étape du parcours, d’année universitaire, de niveau de risque et de type de contenu. J’ai également ajouté la prise en charge de deux documents PDF institutionnels : le Schéma Directeur de la Vie Étudiante et le Schéma Directeur Développement Durable et Responsabilité Sociétale et Environnementale. Les passages extraits conservent le titre du document, l’URL source et le numéro de page.
+
+Une nouvelle extraction a produit 217 pages et 1 126 segments web avant l’intégration finale des contenus PDF. Les pages du portail étudiant restent majoritaires, tandis que les pages institutionnelles sélectionnées apportent principalement les informations sur les candidatures, les formations et les inscriptions.
+
+J’ai vérifié plusieurs cas importants, notamment les langues enseignées, les programmes d’échange, les procédures d’admission en master, les restaurants universitaires, les inscriptions pédagogiques et le statut AJAC. Ces essais ont permis de corriger certaines omissions dans la liste blanche et plusieurs erreurs d’appariement entre une question et une section documentaire.
+
+J’ai ensuite exécuté les configurations M0 à M4 sur le jeu de validation. La recherche sémantique simple obtient une bonne couverture des preuves annotées. Le réordonnancement heuristique améliore certains classements, mais peut également dégrader des questions lorsque les indices lexicaux sont ambigus.
+
+Le seuil sémantique a été calibré uniquement sur le jeu de validation. La valeur retenue pour l’expérience finale est 0,869201. Les premiers résultats montrent cependant un compromis important : le seuil réduit les réponses potentiellement dangereuses, mais provoque aussi des abstentions lorsque le contexte contient déjà une preuve correcte.
+
+J’ai donc décidé de figer les paramètres, le modèle, l’index et le jeu de test avant l’évaluation finale. Le jeu de test ne sera pas utilisé pour modifier le seuil ou les règles de récupération. Les résultats obtenus après cette étape serviront à mesurer la capacité de généralisation des différentes méthodes.
+
+La prochaine étape consiste à exécuter les cinq configurations sur les 70 questions de test, à produire les tableaux et visualisations, puis à réaliser une analyse qualitative des erreurs les plus représentatives.

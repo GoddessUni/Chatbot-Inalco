@@ -103,8 +103,7 @@ def build_chunks(page: dict) -> list[dict]:
         section_title = section.get("section_title") or page.get("title", "")
 
         for text in split_text(section["text"]):
-            chunks.append(
-                {
+            chunk = {
                     "chunk_id": make_chunk_id(page["source_url"], index),
                     "source_url": page["source_url"],
                     "title": page["title"],
@@ -120,7 +119,21 @@ def build_chunks(page: dict) -> list[dict]:
                     "human_verified": page["human_verified"],
                     "text": text,
                 }
-            )
+            for field in (
+                "parent_url",
+                "document_title",
+                "validity_period",
+                "file_sha256",
+                "file_size_bytes",
+                "pdf_pages_total",
+                "pdf_pages_extracted",
+            ):
+                if page.get(field) is not None:
+                    chunk[field] = page[field]
+            for field in ("page_start", "page_end"):
+                if section.get(field) is not None:
+                    chunk[field] = section[field]
+            chunks.append(chunk)
             index += 1
 
     return chunks

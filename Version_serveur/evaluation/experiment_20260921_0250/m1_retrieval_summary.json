@@ -1,0 +1,13 @@
+{
+  "method": "m1_semantic",
+  "splits": [
+    "validation"
+  ],
+  "questions": 20,
+  "answer_questions": 15,
+  "hit_rate_at_k": 0.8666666666666667,
+  "mrr": 0.6944444444444444,
+  "context_hit_rate": 0.8666666666666667,
+  "mean_gold_recall_at_k": 0.7333333333333333,
+  "mean_context_gold_recall": 0.7
+}
