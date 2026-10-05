@@ -369,3 +369,21 @@ Le seuil sémantique a été calibré uniquement sur le jeu de validation. La va
 J’ai donc décidé de figer les paramètres, le modèle, l’index et le jeu de test avant l’évaluation finale. Le jeu de test ne sera pas utilisé pour modifier le seuil ou les règles de récupération. Les résultats obtenus après cette étape serviront à mesurer la capacité de généralisation des différentes méthodes.
 
 La prochaine étape consiste à exécuter les cinq configurations sur les 70 questions de test, à produire les tableaux et visualisations, puis à réaliser une analyse qualitative des erreurs les plus représentatives.
+
+## Semaine 13 (21/09/2026-27/09/2026)
+J’ai terminé l’évaluation des 5 configurations M0 à M4 sur les 70 questions du jeu de test. Avant l’exécution, j’ai figé le jeu de questions, l’index documentaire et les principaux paramètres de génération pour comparer les méthodes dans des conditions identiques.
+
+Pour les 53 questions annotées comme pouvant recevoir une réponse, M1 et M2 retrouvent au moins une preuve de référence dans les 5 premiers passages pour 50 questions. Le réordonnancement heuristique M2 améliore le rang des preuves retrouvées : le MRR passe de 0,843 pour M1 à 0,875 pour M2. Ce résultat porte sur la récupération documentaire et ne démontre pas une amélioration de la fidélité des réponses.
+
+J’ai aussi évalué le comportement « répondre, demander une clarification ou s’abstenir ». M0, M1 et M2 obtiennent une accuracy de 0,757, 0,800 et 0,814. M3 et M4 atteignent chacun 0,486 : le seuil réduit certaines réponses insuffisamment étayées, mais entraîne aussi des abstentions excessives lorsque des informations utiles sont présentes dans le contexte. Cette mesure comportementale doit donc être interprétée avec les matrices de confusion et la couverture des réponses.
+
+L’analyse des réponses montre qu’il faut distinguer 3 sources d’erreurs : l’absence d’une information dans la base, le mauvais classement d’un passage, et une génération qui ne respecte pas suffisamment les preuves fournies. Une évaluation qualitative de la fidélité factuelle reste nécessaire pour mesurer les hallucinations ; les métriques de récupération et de comportement ne suffisent pas à elles seules.
+
+## Semaine 13 (28/09/2026-30/09/2026)
+J’ai étudié une autre manière de réordonner les passages, et j’ai ajouté le modèle neuronal multilingue BGE-reranker-v2-m3 sans entraînement sur le corpus Inalco. La recherche E5 sélectionne d’abord 10 passages candidats, ensuite le BGE les reclasse, et les 5 premiers sont proposés pour la génération. Cette configuration constitue une méthode supplémentaire, distincte du réordonnancement heuristique M2 déjà évalué.
+
+Sur le jeu de validation, BGE avec 10 candidats retrouve une preuve de référence dans le top 5 pour 14 des 15 questions qu’il faut répondre, contre 13 pour M1 et 12 pour le M2 heuristique testé dans cette comparaison. L’augmentation du nombre de candidats à 20 ou 30 n’améliore pas le résultat final. Avant le réordonnancement, plus de passages sont disponible, mais certains passages pertinents se retrouvent moins bien classés ou ne sont pas inclus dans le contexte transmis au modèle.
+
+J’ai ensuite comparé cette configuration aux résultats du jeu de test avec le même index et les mêmes questions. BGE-10 obtient 50 questions avec une preuve dans le top 5 sur 53 questions qu’il faut répondre. Son MRR est toutefois inférieur : 0,792, contre 0,843 pour M1 et 0,875 pour M2. Il améliore certains cas, notamment une question sur les masters accessibles par Mon Master, mais les autres se sont dégradées. Dans une question sur les coordonnées du secrétariat pédagogique, le passage pertinent apparaît encore dans le top 5, mais n’entre pas dans le contexte final à cause de la limite de longueur.
+
+Ces résultats montrent qu’un modèle de réordonnancement plus complexe n’est pas toujours meilleur pour ce corpus. Comme le jeu de test avait déjà été examiné lors des expériences précédentes, je présente BGE comme une analyse complémentaire, la prochaine étape est de générer les réponses avec BGE-10 dans les mêmes conditions que les méthodes précédentes, puis de comparer manuellement leur fidélité aux sources, leur complétude et leurs citations.
