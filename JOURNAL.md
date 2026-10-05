@@ -379,7 +379,7 @@ J’ai aussi évalué le comportement « répondre, demander une clarification o
 
 L’analyse des réponses montre qu’il faut distinguer 3 sources d’erreurs : l’absence d’une information dans la base, le mauvais classement d’un passage, et une génération qui ne respecte pas suffisamment les preuves fournies. Une évaluation qualitative de la fidélité factuelle reste nécessaire pour mesurer les hallucinations ; les métriques de récupération et de comportement ne suffisent pas à elles seules.
 
-## Semaine 13 (28/09/2026-30/09/2026)
+## Semaine 14 (28/09/2026-30/09/2026)
 J’ai étudié une autre manière de réordonner les passages, et j’ai ajouté le modèle neuronal multilingue BGE-reranker-v2-m3 sans entraînement sur le corpus Inalco. La recherche E5 sélectionne d’abord 10 passages candidats, ensuite le BGE les reclasse, et les 5 premiers sont proposés pour la génération. Cette configuration constitue une méthode supplémentaire, distincte du réordonnancement heuristique M2 déjà évalué.
 
 Sur le jeu de validation, BGE avec 10 candidats retrouve une preuve de référence dans le top 5 pour 14 des 15 questions qu’il faut répondre, contre 13 pour M1 et 12 pour le M2 heuristique testé dans cette comparaison. L’augmentation du nombre de candidats à 20 ou 30 n’améliore pas le résultat final. Avant le réordonnancement, plus de passages sont disponible, mais certains passages pertinents se retrouvent moins bien classés ou ne sont pas inclus dans le contexte transmis au modèle.
